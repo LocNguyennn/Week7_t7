@@ -6,10 +6,11 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import com.watasolutions.week7_t7.MySharedPreferences
-import com.watasolutions.week7_t7.app.MyApp
-import com.watasolutions.week7_t7.app.ViewModelFactory
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.watasolutions.week7_t7.R
+import com.watasolutions.week7_t7.app.ListAdapter
 import com.watasolutions.week7_t7.databinding.FragmentLoginBinding
+import com.watasolutions.week7_t7.model.User
 
 
 /**
@@ -19,13 +20,11 @@ import com.watasolutions.week7_t7.databinding.FragmentLoginBinding
  */
 class LoginFragment : Fragment() {
     lateinit var binding: FragmentLoginBinding
-    lateinit var viewModel: LoginViewModel
-    lateinit var prefs: MySharedPreferences
+    lateinit var viewModel: UserViewModel
+    lateinit var adapter : ListAdapter
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        viewModel = ViewModelProvider(this, ViewModelFactory(activity?.application as MyApp)).get(
-            LoginViewModel::class.java
-        )
+        viewModel = ViewModelProvider(this).get(UserViewModel::class.java)
     }
 
     override fun onCreateView(
@@ -34,25 +33,28 @@ class LoginFragment : Fragment() {
     ): View {
         // Inflate the layout for this fragment
         binding = FragmentLoginBinding.inflate(inflater, container, false)
+
+        adapter = ListAdapter()
+        binding.rvUser.layoutManager = LinearLayoutManager(context)
+        binding.rvUser.adapter = adapter
+        val recyclerView = inflater.inflate(R.layout.fragment_login,container,false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         registerSaveSuccess()
-        registerLoadUserEvent()
+        loadUserInfo()
         binding.btnSave.setOnClickListener {
             val username = binding.tvUsername.editText?.text.toString().trim()
             val pass = binding.tvPassword.editText?.text.toString().trim()
-            viewModel.saveUserInfo(username, pass)
-        }
-        binding.btnLoad.setOnClickListener {
-            viewModel.loadUserInfo()
+            val user = User(username,pass)
+            viewModel.addUser(user)
         }
     }
 
     private fun registerSaveSuccess(){
-        viewModel.saveEventSuccess.observe(this){
+        viewModel.saveEventSuccess.observe(viewLifecycleOwner){
             when(it) {
                 true -> {
                     binding.tvUsername.editText?.setText("")
@@ -62,9 +64,9 @@ class LoginFragment : Fragment() {
         }
     }
 
-    private fun registerLoadUserEvent(){
-        viewModel.loadUserEvent.observe(this){
-            binding.tvReview.text = "${it.username} - ${it.password}"
+    private fun loadUserInfo(){
+        viewModel.readAllData.observe(viewLifecycleOwner){
+            adapter.setData(it)
         }
     }
 
