@@ -1,6 +1,6 @@
 # Week7_t7
 
 Sử dụng Room thay thế cho SharedPreference
-Data tự động load lên sau khi lưu
+Click load để load dữ liệu lên
 
  ![master](week7.gif)
