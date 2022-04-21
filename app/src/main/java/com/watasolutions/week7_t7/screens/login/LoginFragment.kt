@@ -22,10 +22,6 @@ class LoginFragment : Fragment() {
     lateinit var binding: FragmentLoginBinding
     lateinit var viewModel: UserViewModel
     lateinit var adapter : ListAdapter
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        viewModel = ViewModelProvider(this).get(UserViewModel::class.java)
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -33,23 +29,25 @@ class LoginFragment : Fragment() {
     ): View {
         // Inflate the layout for this fragment
         binding = FragmentLoginBinding.inflate(inflater, container, false)
+        viewModel = ViewModelProvider(this).get(UserViewModel::class.java)
 
-        adapter = ListAdapter()
-        binding.rvUser.layoutManager = LinearLayoutManager(context)
-        binding.rvUser.adapter = adapter
-        val recyclerView = inflater.inflate(R.layout.fragment_login,container,false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        adapter = ListAdapter()
+        binding.rvUser.layoutManager = LinearLayoutManager(context)
+        binding.rvUser.adapter = adapter
         registerSaveSuccess()
-        loadUserInfo()
         binding.btnSave.setOnClickListener {
             val username = binding.tvUsername.editText?.text.toString().trim()
             val pass = binding.tvPassword.editText?.text.toString().trim()
             val user = User(username,pass)
             viewModel.addUser(user)
+        }
+        binding.btnLoad.setOnClickListener {
+            adapter.setData(viewModel.loadData())
         }
     }
 
@@ -64,10 +62,5 @@ class LoginFragment : Fragment() {
         }
     }
 
-    private fun loadUserInfo(){
-        viewModel.readAllData.observe(viewLifecycleOwner){
-            adapter.setData(it)
-        }
-    }
 
 }

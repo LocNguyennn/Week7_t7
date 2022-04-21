@@ -1,5 +1,6 @@
 package com.watasolutions.week7_t7.app
 
+import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -29,6 +30,7 @@ class ListAdapter : RecyclerView.Adapter<ListAdapter.MyViewHolder>() {
         return userList.size
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     fun setData(user : List<User>){
         this.userList = user
         notifyDataSetChanged()

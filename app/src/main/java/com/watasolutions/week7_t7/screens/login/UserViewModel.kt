@@ -12,7 +12,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class UserViewModel(application: Application) : AndroidViewModel(application) {
-    val readAllData : LiveData<List<User>>
+    private lateinit var readAllData : List<User>
     private val repository : UserRepository
     private var _saveEventSuccess: MutableLiveData<Boolean> = MutableLiveData()
     val saveEventSuccess: LiveData<Boolean>
@@ -21,13 +21,21 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
 
         val userDAO = UserDatabase.getDatabase(application).userDao()
         repository = UserRepository(userDAO)
-        readAllData = repository.readAllData
+        viewModelScope.launch(Dispatchers.IO) {
+            readAllData = repository.loadUser()
+        }
     }
     fun addUser(user : User){
         viewModelScope.launch(Dispatchers.IO) {
             repository.addUser(user)
         }
         _saveEventSuccess.value = true
+    }
+    fun loadData() : List<User>{
+        viewModelScope.launch(Dispatchers.IO) {
+            readAllData = repository.loadUser()
+        }
+        return readAllData
     }
 
 }
